@@ -28,4 +28,4 @@ jobs:
           echo "Creating zip." ;
           zip -r -q CryptoVoxels-latest-archive.zip CryptoVoxelsArchive ;
           echo "Deploying archive to Arweave." ;
-          arkb deploy CryptoVoxels-latest-archive.zip --auto-confirm --wallet arweave-keyfile-f7QsdAM6sBC0UsUp1JoEXT93yMbCAPQIo1uBLhjDGSE.json --tag.Tag-Name=CryptoVoxelsArchive ;
+          arkb deploy CryptoVoxels-latest-archive.zip --auto-confirm --wallet arweave-keyfile-f7Qetc.json --tag.Tag-Name=CryptoVoxelsArchive ;
