@@ -1,0 +1,36 @@
+name: Automated Backups Cryptovoxels
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: npm install
+        run: |
+          npm install -g @textury/arkb
+      - name: Run Backups
+        run: |
+          echo "Downloading map info..." ;
+          curl -s 'https://www.cryptovoxels.com/api/parcels.json' > CryptoVoxelsArchive/parcels.json ;
+          curl -s 'https://www.cryptovoxels.com/api/suburbs.json' > CryptoVoxelsArchive/suburbs.json ;
+          curl -s 'https://www.cryptovoxels.com/api/islands.json' > CryptoVoxelsArchive/islands.json ;
+          cat CryptoVoxelsArchive/parcels.json | jq '.parcels | .[] | .id' | while read id ;
+          do 
+            echo "Downloading land parcel info $id..."
+            curl -s "https://www.cryptovoxels.com/grid/parcels/$id" > CryptoVoxelsArchive/parcels/$id.json
+          done
+          echo "Creating zip." ;
+          zip -r -q CryptoVoxels-latest-archive.zip CryptoVoxelsArchive ;
+          echo "Deploying archive to Arweave." ;
+          arkb deploy --auto-confirm CryptoVoxels-latest-archive.zip --wallet arweave-keyfile-f7QsdAM6sBC0UsUp1JoEXT93yMbCAPQIo1uBLhjDGSE.json --tag.Tag-Name=CryptoVoxelsArchive ;
+      - name: Commit and push files
+        run: |
+          git config --local user.email "ries9112@colorado.edu"
+          git config --local user.name "ries9112"
+          git add .
+          git commit -m "Automated CV backups from CI automated process" -a
+          git push https://ries9112:${{secrets.TOKEN}}@github.com/ries9112/CV-arweave-backups.git HEAD:main --force
